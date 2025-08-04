@@ -41,7 +41,7 @@ unturned-server/
 | `QUERY_PORT` | 27016 | Query port |
 | `MAP` | PEI | Map name (PEI, Washington, Russia, etc.) |
 | `DIFFICULTY` | Normal | Difficulty (Easy, Normal, Hard) |
-| `MODE` | Survival | Game mode |
+| `MODE` | Survival | Game mode (see Game Modes section below) |
 | `PERSPECTIVE` | Both | Camera perspective (First, Third, Both, Vehicle) |
 | `PVP` | true | Enable PvP |
 | `BATTLEYE` | true | Enable BattlEye anti-cheat |
@@ -55,6 +55,36 @@ unturned-server/
 To add Workshop mods/maps, add their Steam Workshop file IDs to the `WORKSHOP_FILE_IDS` variable:
 ```env
 WORKSHOP_FILE_IDS=1234567890,0987654321,1111111111
+```
+
+## Game Modes
+
+### Official Game Modes
+
+- **Survival** - The main game mode where you gather resources and survive the zombie apocalypse (default)
+- **Horde** - Survive incoming zombie waves, buy new weapons, and survive as long as possible
+- **Arena** - Be the last man standing by killing other players while watching out for the circle (battle royale style)
+
+### Custom Game Modes
+
+- **Deathmatch** - PvP deathmatch mode, often played on Close Quarters Arena maps
+
+### Community Modes
+
+These are typically achieved through server configuration, plugins, or custom maps:
+- **Creative** - Building and creative gameplay
+- **Roleplay (RP)** - Community-driven roleplay servers
+- **Paintball** - PvP paintball matches
+- **Battle Royale** - Last man standing gameplay (similar to Arena but with custom rules)
+
+### Setting Game Mode
+
+In your `.env` file, set the `MODE` variable:
+```env
+MODE=Survival    # Default zombie survival
+MODE=Horde      # Wave-based zombie survival  
+MODE=Arena      # Battle royale/PvP
+MODE=Deathmatch # PvP deathmatch (if supported by map)
 ```
 
 ### Admin Setup
