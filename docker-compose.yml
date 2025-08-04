@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   unturned-server:
     image: cm2network/steamcmd:root
@@ -19,18 +17,20 @@ services:
       - .env
     command: >
       bash -c "
-        # Install SteamCMD and Unturned Dedicated Server
-        /home/steam/steamcmd/steamcmd.sh +force_install_dir /home/steam/unturned-server +login anonymous +app_update 1110390 validate +quit &&
+        # Fix permissions first
+        chown -R steam:steam /home/steam/unturned-server &&
+        chown -R steam:steam /home/steam/config &&
+        
+        # Install SteamCMD and Unturned Dedicated Server as steam user
+        sudo -u steam /home/steam/steamcmd/steamcmd.sh +force_install_dir /home/steam/unturned-server +login anonymous +app_update 1110390 validate +quit &&
         
         # Copy server configuration
-        cp -r /home/steam/config/* /home/steam/unturned-server/Servers/$$SERVER_NAME/ 2>/dev/null || true &&
-        
-        # Set permissions
-        chown -R steam:steam /home/steam/unturned-server &&
+        sudo -u steam mkdir -p /home/steam/unturned-server/Servers/$SERVER_NAME &&
+        sudo -u steam cp -r /home/steam/config/* /home/steam/unturned-server/Servers/$SERVER_NAME/ 2>/dev/null || true &&
         
         # Start the server
         cd /home/steam/unturned-server &&
-        sudo -u steam ./ServerHelper.sh +InternetServer/$$SERVER_NAME
+        sudo -u steam ./ServerHelper.sh +InternetServer/$SERVER_NAME
       "
     networks:
       - unturned-network

@@ -158,6 +158,25 @@ sudo iptables -A INPUT -p udp --dport 27016 -j ACCEPT
 
 ## Troubleshooting
 
+### Permission Errors (Failed to install app '1110390')
+This is the most common issue. Try these solutions in order:
+
+1. **Stop and restart with clean volumes**:
+   ```bash
+   docker-compose down
+   docker volume prune
+   docker-compose up -d
+   ```
+
+2. **Fix host directory permissions**:
+   ```bash
+   sudo chown -R 1000:1000 ./server-data ./config
+   sudo chmod -R 755 ./server-data ./config
+   docker-compose restart unturned-server
+   ```
+
+3. **For persistent permission issues**, see the detailed `TROUBLESHOOTING.md` file.
+
 ### Server won't start
 1. Check the logs: `docker-compose logs unturned-server`
 2. Verify your `.env` configuration
