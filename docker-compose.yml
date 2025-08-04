@@ -9,35 +9,39 @@ services:
       - "${SERVER_PORT:-27015}:${SERVER_PORT:-27015}/udp"
       - "${QUERY_PORT:-27016}:${QUERY_PORT:-27016}/udp"
     volumes:
-      - ./server-data:/home/steam/unturned-server
-      - ./scripts:/home/steam/scripts
-      - ./config:/home/steam/config
-    environment:
-      - PUID=1000
-      - PGID=1000
+      - unturned-data:/home/steam/unturned-server
+      - ./config:/tmp/config:ro
     env_file:
       - .env
     command: >
       bash -c "
-        # Fix permissions first
-        chown -R steam:steam /home/steam/unturned-server &&
-        chown -R steam:steam /home/steam/config &&
+        echo 'Starting Unturned Dedicated Server...' &&
         
-        # Install SteamCMD and Unturned Dedicated Server as steam user
-        sudo -u steam /home/steam/steamcmd/steamcmd.sh +force_install_dir /home/steam/unturned-server +login anonymous +app_update 1110390 validate +quit &&
+        # Create steam user if needed and fix ownership
+        chown -R steam:steam /home/steam &&
         
-        # Copy server configuration
-        sudo -u steam mkdir -p /home/steam/unturned-server/Servers/$SERVER_NAME &&
-        sudo -u steam cp -r /home/steam/config/* /home/steam/unturned-server/Servers/$SERVER_NAME/ 2>/dev/null || true &&
+        # Install Unturned as steam user
+        echo 'Installing/Updating Unturned...' &&
+        runuser -u steam -- /home/steam/steamcmd/steamcmd.sh +force_install_dir /home/steam/unturned-server +login anonymous +app_update 1110390 validate +quit &&
         
-        # Start the server
+        # Setup server directory
+        echo 'Setting up server configuration...' &&
+        runuser -u steam -- mkdir -p /home/steam/unturned-server/Servers/\$SERVER_NAME &&
+        
+        # Copy config files
+        if [ -d /tmp/config ]; then
+          runuser -u steam -- cp -r /tmp/config/* /home/steam/unturned-server/Servers/\$SERVER_NAME/ 2>/dev/null || true
+        fi &&
+        
+        # Start server
+        echo 'Starting server: '\$SERVER_NAME &&
         cd /home/steam/unturned-server &&
-        sudo -u steam ./ServerHelper.sh +InternetServer/$SERVER_NAME
+        runuser -u steam -- ./ServerHelper.sh +InternetServer/\$SERVER_NAME
       "
     networks:
       - unturned-network
 
-  # Optional: Web-based server management (Pterodactyl-style panel)
+  # Optional: Web-based server management panel
   unturned-web:
     image: nginx:alpine
     container_name: unturned-web-panel
@@ -45,7 +49,7 @@ services:
     ports:
       - "${WEB_PORT:-8080}:80"
     volumes:
-      - ./web:/usr/share/nginx/html
+      - ./web:/usr/share/nginx/html:ro
     depends_on:
       - unturned-server
     networks:
@@ -58,5 +62,5 @@ networks:
     driver: bridge
 
 volumes:
-  server-data:
-  config-data:
+  unturned-data:
+    driver: local

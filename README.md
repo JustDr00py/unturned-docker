@@ -100,6 +100,14 @@ MODE=Deathmatch # PvP deathmatch (if supported by map)
 docker-compose up -d
 ```
 
+### Optional: Enable Web Management Panel
+```bash
+# Start with web panel
+docker-compose --profile web up -d
+
+# Access web panel at http://your-server-ip:8080
+```
+
 ### Stop the server
 ```bash
 docker-compose down

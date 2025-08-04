@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unturned Server Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+        
+        .card h3 {
+            color: #4a5568;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #48bb78;
+            box-shadow: 0 0 10px rgba(72, 187, 120, 0.5);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #4a5568;
+        }
+        
+        .info-value {
+            color: #2d3748;
+            font-weight: 500;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .logs-container {
+            background: #1a202c;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .connection-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            text-align: center;
+            color: white;
+        }
+        
+        .connection-info strong {
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 Unturned Server Management</h1>
+            <p>Monitor and manage your Unturned dedicated server</p>
+        </div>
+        
+        <div class="dashboard">
+            <div class="card">
+                <h3>
+                    <span class="status-indicator"></span>
+                    Server Status
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Status:</span>
+                        <span class="info-value" id="server-status">Running</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Players:</span>
+                        <span class="info-value" id="player-count">0/24</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Map:</span>
+                        <span class="info-value" id="current-map">PEI</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Mode:</span>
+                        <span class="info-value" id="game-mode">Survival</span>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="restartServer()">🔄 Restart</button>
+                    <button class="btn btn-warning" onclick="saveServer()">💾 Save</button>
+                    <button class="btn btn-danger" onclick="stopServer()">⏹️ Stop</button>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>📊 Server Information</h3>
+                <div class="info-item">
+                    <span class="info-label">Server Name:</span>
+                    <span class="info-value" id="server-name">MyUnturnedServer</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Port:</span>
+                    <span class="info-value" id="server-port">27015</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Difficulty:</span>
+                    <span class="info-value" id="difficulty">Normal</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">PvP:</span>
+                    <span class="info-value" id="pvp-status">Enabled</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">BattlEye:</span>
+                    <span class="info-value" id="battleye-status">Enabled</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Uptime:</span>
+                    <span class="info-value" id="uptime">0d 0h 0m</span>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🛠️ Quick Actions</h3>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="viewPlayers()">👥 View Players</button>
+                    <button class="btn btn-primary" onclick="manageBans()">🚫 Manage Bans</button>
+                    <button class="btn btn-primary" onclick="editConfig()">⚙️ Edit Config</button>
+                    <button class="btn btn-primary" onclick="viewLogs()">📋 View Logs</button>
+                    <button class="btn btn-warning" onclick="backupServer()">📦 Backup</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="connection-info">
+            <strong>Connect to Server:</strong>
+            <span id="server-ip">Loading...</span>
+        </div>
+        
+        <div class="logs-container" id="logs" style="display: none;">
+            <h4>Server Logs</h4>
+            <div id="log-content">
+                [INFO] Server starting up...
+                [INFO] Loading map: PEI
+                [INFO] Server ready for connections
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Unturned Dedicated Server Management Panel v1.0</p>
+            <p>Built with ❤️ for the Unturned community</p>
+        </div>
+    </div>
+    
+    <script>
+        // Mock data - replace with actual API calls
+        let serverData = {
+            name: 'MyUnturnedServer',
+            port: 27015,
+            players: 0,
+            maxPlayers: 24,
+            map: 'PEI',
+            mode: 'Survival',
+            difficulty: 'Normal',
+            pvp: true,
+            battleye: true,
+            uptime: 0
+        };
+        
+        function updateServerInfo() {
+            document.getElementById('server-name').textContent = serverData.name;
+            document.getElementById('server-port').textContent = serverData.port;
+            document.getElementById('player-count').textContent = `${serverData.players}/${serverData.maxPlayers}`;
+            document.getElementById('current-map').textContent = serverData.map;
+            document.getElementById('game-mode').textContent = serverData.mode;
+            document.getElementById('difficulty').textContent = serverData.difficulty;
+            document.getElementById('pvp-status').textContent = serverData.pvp ? 'Enabled' : 'Disabled';
+            document.getElementById('battleye-status').textContent = serverData.battleye ? 'Enabled' : 'Disabled';
+            
+            // Update server IP (you'll need to replace this with actual server IP)
+            document.getElementById('server-ip').textContent = `${window.location.hostname}:${serverData.port}`;
+        }
+        
+        function updateUptime() {
+            serverData.uptime++;
+            const days = Math.floor(serverData.uptime / 86400);
+            const hours = Math.floor((serverData.uptime % 86400) / 3600);
+            const minutes = Math.floor((serverData.uptime % 3600) / 60);
+            document.getElementById('uptime').textContent = `${days}d ${hours}h ${minutes}m`;
+        }
+        
+        // Server management functions (these would connect to actual Docker API)
+        function restartServer() {
+            if (confirm('Are you sure you want to restart the server?')) {
+                alert('Server restart initiated. This may take a few moments.');
+                // Add actual restart logic here
+            }
+        }
+        
+        function saveServer() {
+            alert('Server world saved successfully!');
+            // Add actual save logic here
+        }
+        
+        function stopServer() {
+            if (confirm('Are you sure you want to stop the server? Players will be disconnected.')) {
+                alert('Server stop initiated.');
+                // Add actual stop logic here
+            }
+        }
+        
+        function viewPlayers() {
+            alert('Player management panel would open here.');
+            // Implement player management interface
+        }
+        
+        function manageBans() {
+            alert('Ban management panel would open here.');
+            // Implement ban management interface
+        }
+        
+        function editConfig() {
+            alert('Configuration editor would open here.');
+            // Implement config editor
+        }
+        
+        function viewLogs() {
+            const logsContainer = document.getElementById('logs');
+            logsContainer.style.display = logsContainer.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function backupServer() {
+            if (confirm('Create a backup of the server data?')) {
+                alert('Backup initiated. This may take a few minutes.');
+                // Add actual backup logic here
+            }
+        }
+        
+        // Initialize
+        updateServerInfo();
+        setInterval(updateUptime, 60000); // Update uptime every minute
+        
+        // You can add periodic server status updates here
+        // setInterval(fetchServerStatus, 30000); // Every 30 seconds
+    </script>
+</body>
+</html>
