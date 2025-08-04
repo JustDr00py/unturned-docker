@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  unturned-server:
+    image: cm2network/steamcmd:root
+    container_name: unturned-dedicated-server
+    restart: unless-stopped
+    ports:
+      - "${SERVER_PORT:-27015}:${SERVER_PORT:-27015}/udp"
+      - "${QUERY_PORT:-27016}:${QUERY_PORT:-27016}/udp"
+    volumes:
+      - ./server-data:/home/steam/unturned-server
+      - ./scripts:/home/steam/scripts
+      - ./config:/home/steam/config
+    environment:
+      - PUID=1000
+      - PGID=1000
+    env_file:
+      - .env
+    command: >
+      bash -c "
+        # Install SteamCMD and Unturned Dedicated Server
+        /home/steam/steamcmd/steamcmd.sh +force_install_dir /home/steam/unturned-server +login anonymous +app_update 1110390 validate +quit &&
+        
+        # Copy server configuration
+        cp -r /home/steam/config/* /home/steam/unturned-server/Servers/$$SERVER_NAME/ 2>/dev/null || true &&
+        
+        # Set permissions
+        chown -R steam:steam /home/steam/unturned-server &&
+        
+        # Start the server
+        cd /home/steam/unturned-server &&
+        sudo -u steam ./ServerHelper.sh +InternetServer/$$SERVER_NAME
+      "
+    networks:
+      - unturned-network
+
+  # Optional: Web-based server management (Pterodactyl-style panel)
+  unturned-web:
+    image: nginx:alpine
+    container_name: unturned-web-panel
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8080}:80"
+    volumes:
+      - ./web:/usr/share/nginx/html
+    depends_on:
+      - unturned-server
+    networks:
+      - unturned-network
+    profiles:
+      - web
+
+networks:
+  unturned-network:
+    driver: bridge
+
+volumes:
+  server-data:
+  config-data:

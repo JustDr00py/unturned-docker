@@ -1,0 +1,14 @@
+// Server commands configuration
+// Add your custom server commands here
+
+// Example: Welcome message command
+welcome Welcome to our Unturned server! Please read the rules with /rules
+
+// Example: Rules command
+rules Server Rules: 1. No cheating 2. Be respectful 3. No griefing 4. Have fun!
+
+// Example: Admin help
+adminhelp Admin commands: /give, /teleport, /kick, /ban, /save, /shutdown
+
+// Example: Server info
+info Server Info: Max Players: 24 | Map: PEI | Mode: Survival | PvP: Enabled
